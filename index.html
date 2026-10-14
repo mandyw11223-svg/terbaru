@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<title>Petualangan Lebah: Misi Penyerbukan</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:'Fredoka','Trebuchet MS',sans-serif;user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:#fff}
+#bg{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none}
+#ui,#modal{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#modal{display:none;background:rgba(0,0,0,.55);z-index:50}
+.h{position:absolute;cursor:pointer;border-radius:36px;-webkit-tap-highlight-color:transparent}
+.h:active{background:rgba(255,255,255,.35)}
+.pulse{animation:pl 1s infinite;border-radius:50%}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(255,190,0,.9)}100%{box-shadow:0 0 0 45px rgba(255,190,0,0)}}
+.cards{position:absolute;left:480px;top:372px;display:grid;grid-template-columns:repeat(3,300px);gap:20px 26px}
+.card{height:176px;box-sizing:border-box;border-radius:22px;padding:12px 16px;background:#fffdf3;border:5px solid;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .2s}
+.card b{font:700 32px Fredoka}.card span{font:500 25px/1.2 Fredoka;color:#3b2a14}
+.card.s{border-color:#f0b400}.card.p{border-color:#e0567a}.card.o{border-color:#4a9a3a}
+.card.pop{transform:scale(1.08)}
+.tray{position:absolute;left:29px;top:874px;width:1862px;height:172px;display:flex;justify-content:space-evenly;align-items:center}
+.w{padding:24px 28px;cursor:grab;touch-action:none;position:relative;z-index:5;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+.w img{display:block;pointer-events:none}
+.w.back{transition:transform .3s}
+.badge{position:absolute;width:64px;height:64px;border-radius:50%;font:700 40px/64px Fredoka;text-align:center;color:#fff;z-index:9}
+.msg{position:absolute;left:29px;top:874px;width:1862px;height:172px;display:flex;align-items:center;justify-content:center;font:700 54px Fredoka;color:#5a3512;text-align:center}
+.say{position:absolute;left:360px;top:905px;width:1200px;height:130px;box-sizing:border-box;padding:10px 30px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;border:6px solid #8a5a2b;border-radius:40px;font:500 40px/1.15 Fredoka;color:#3b2a14}
+.bee{position:absolute;width:190px;height:190px;cursor:grab;touch-action:none;z-index:6;transition:left .45s,top .45s}
+.bee.drag{transition:none;cursor:grabbing}
+.bee svg{width:100%;height:100%;animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-12px)}}
+.pol{display:none}.has .pol{display:inline}
+.spk{position:absolute;font-size:56px;z-index:8;animation:sp 1.1s forwards}
+@keyframes sp{to{transform:translate(var(--dx),var(--dy)) scale(1.6);opacity:0}}
+.btn{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;background:#fff;border:6px solid #111;border-radius:60px;box-shadow:0 10px 0 #111;font:700 44px Fredoka;color:#111}
+.btn:active{transform:translateY(6px);box-shadow:0 4px 0 #111}
+.homebtn{position:absolute;left:8px;top:8px;width:132px;height:132px;border-radius:50%;background:#f6a23a;border:6px solid #fff;font-size:70px;line-height:120px;text-align:center;cursor:pointer;box-sizing:border-box}
+.wood{background:linear-gradient(#cf9250,#a96b32);border:6px solid #7a4a1f;border-radius:30px;color:#fff;font-weight:700;text-align:center;position:absolute;box-sizing:border-box}
+.qq{position:absolute;left:160px;top:210px;width:1600px;min-height:150px;font:700 54px/1.2 Fredoka;color:#3b2a14;text-align:center}
+.qo{position:absolute;left:260px;width:1400px;height:128px;box-sizing:border-box;padding:0 30px;display:flex;align-items:center;justify-content:center;text-align:center;background:#f6c76b;border:6px solid #b9792a;border-radius:36px;font:700 40px/1.15 Fredoka;color:#3b2a14;cursor:pointer;box-shadow:0 8px 0 #b9792a}
+.qo.ok{background:#7bd37b;border-color:#2f8f2f}.qo.no{background:#f08a8a;border-color:#b13030}
+.box{position:absolute;left:360px;top:150px;width:1200px;background:#fffdf3;border:8px solid #8a5a2b;border-radius:44px;padding:40px 60px;box-sizing:border-box;font:500 40px/1.35 Fredoka;color:#3b2a14}
+.box h2{margin:0 0 20px;font:700 62px Fredoka;color:#a2561a;text-align:center}
+.box p{margin:8px 0}
+.fsb{position:fixed;left:10px;bottom:10px;z-index:99;width:44px;height:44px;border-radius:10px;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:24px;cursor:pointer}
+</style></head><body>
+<div id="stage"><img id="bg" src="assets/1.jpg" alt=""><div id="ui"></div><div id="modal"></div></div>
+<button class="fsb" title="Layar penuh" onclick="fs()">⛶</button>
+<script>
+const $=s=>document.querySelector(s),st=$('#stage'),bg=$('#bg'),ui=$('#ui'),md=$('#modal');
+const el=(t,c,h)=>{const e=document.createElement(t);e.className=c||'';if(h!=null)e.innerHTML=h;return e};
+const box=(e,x,y,w,h)=>{Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});return e};
+// ---------- skala layar 1920x1080 ----------
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);st.style.transform=`translate(${(innerWidth-1920*s)/2}px,${(innerHeight-1080*s)/2}px) scale(${s})`}
+addEventListener('resize',fit);fit();
+const fs=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+const P=e=>{const r=st.getBoundingClientRect(),s=r.width/1920;return[(e.clientX-r.left)/s,(e.clientY-r.top)/s,s]};
+// ---------- suara & penyimpanan ----------
+let ac;const snd=(f,d=.15,t='sine')=>{try{ac=ac||new(window.AudioContext||webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}};
+const tap=()=>snd(520,.08),good=()=>{snd(660);setTimeout(()=>snd(880,.25),120)},bad=()=>snd(180,.3,'square');
+let S={};try{S=JSON.parse(localStorage.getItem('lebah')||'{}')}catch(e){}
+const sv=()=>{try{localStorage.setItem('lebah',JSON.stringify(S))}catch(e){}};
+// ---------- navigasi ----------
+const NEXT={2:3,3:4,4:5,5:6,6:7,7:8,8:9,9:11};
+const hs=(x,y,w,h,fn,cls)=>{const d=el('div','h '+(cls||''));box(d,x,y,w,h);d.onclick=()=>{tap();fn()};ui.append(d);return d};
+function go(n){md.style.display='none';ui.innerHTML='';bg.src='assets/'+n+'.jpg';
+ if(n>=2&&n<=9)hs(0,0,150,150,()=>go(n==2?1:2));
+ if(NEXT[n]&&n!=11)window.arrow=hs(1785,5,135,135,()=>go(NEXT[n]));
+ (SETUP[n]||(()=>{}))(n)}
+const NX=n=>hs(1340,275,115,85,()=>go(n));
+function modal(html){md.innerHTML='';const b=el('div','box',html);md.append(b);const c=el('div','btn','Tutup');box(c,780,880,360,120);c.onclick=()=>{tap();md.style.display='none'};md.append(c);md.style.display='block'}
+// ---------- isi tiap layar ----------
+const CARDS=[['Mahkota','Menarik serangga dengan warna dan aroma','o'],['Kelopak','Melindungi bunga saat masih kuncup','o'],['Dasar bunga','Tempat menempelnya bagian bunga','o'],['Kepala sari','Tempat serbuk sari dihasilkan','s'],['Tangkai sari','Menyangga kepala sari','s'],['Kepala putik','Menerima serbuk sari','p'],['Tangkai putik','Jalan serbuk sari menuju bakal buah','p'],['Bakal buah','Nanti tumbuh menjadi buah','p'],['Bakal biji','Nanti tumbuh menjadi biji','p']];
+const ANS=[[206,229,419,90,'kepala_sari'],[1273,185,420,90,'kepala_putik'],[186,659,419,90,'serbuk_sari'],[1278,659,420,90,'mahkota_bunga']]; // ubah di sini jika kunci jawaban ingin diganti
+const BEE=`<svg viewBox="0 0 200 200"><defs><clipPath id="bc"><ellipse cx="100" cy="112" rx="62" ry="55"/></clipPath></defs><g stroke="#4a2c17" stroke-width="5" stroke-linejoin="round"><ellipse cx="72" cy="52" rx="26" ry="40" transform="rotate(-28 72 52)" fill="#dff3ff" stroke="#6bb5d8"/><ellipse cx="128" cy="52" rx="26" ry="40" transform="rotate(28 128 52)" fill="#dff3ff" stroke="#6bb5d8"/><path d="M85 62Q75 38 62 32M115 62Q125 38 138 32" fill="none"/><circle cx="60" cy="30" r="8" fill="#4a2c17"/><circle cx="140" cy="30" r="8" fill="#4a2c17"/><ellipse cx="100" cy="112" rx="62" ry="55" fill="#ffd93b"/><g clip-path="url(#bc)"><path d="M30 142H170M30 162H170" stroke-width="14"/></g></g><circle cx="78" cy="100" r="9" fill="#222"/><circle cx="122" cy="100" r="9" fill="#222"/><circle cx="75" cy="96" r="3" fill="#fff"/><circle cx="119" cy="96" r="3" fill="#fff"/><circle cx="58" cy="118" r="9" fill="#ff9aa8" opacity=".8"/><circle cx="142" cy="118" r="9" fill="#ff9aa8" opacity=".8"/><path d="M88 120Q100 136 112 120Z" fill="#e84a5f" stroke="#4a2c17" stroke-width="3"/><g class="pol" fill="#ffb300" stroke="#fff" stroke-width="3"><circle cx="70" cy="178" r="9"/><circle cx="100" cy="184" r="10"/><circle cx="130" cy="178" r="9"/></g></svg>`;
+const SETUP={
+5:()=>{NX(6);const d=el('div','cards');box(d,480,372,952,568);d.style.width='auto';d.style.height='auto';ui.append(d);
+ CARDS.forEach(([n,f,k])=>{const c=el('div','card '+k,`<b>${n}</b><span>${f}</span>`);c.onclick=()=>{tap();c.classList.add('pop');setTimeout(()=>c.classList.remove('pop'),350)};d.append(c)})},
+4:()=>NX(5),6:()=>NX(7),
+1:()=>hs(761,752,400,165,()=>{fs();go(2)}),
+2:()=>{hs(897,227,767,149,()=>go(3));hs(897,393,767,148,()=>go(7));hs(897,564,767,148,ach);hs(897,732,767,149,help)},
+3:()=>hs(738,709,420,172,()=>go(4)),
+7:()=>hs(738,709,420,172,()=>go(8)),
+8:()=>{const tr=el('div','tray');ui.append(tr);let n=0;const done=new Set();
+ [...ANS.map(a=>a[4])].sort(()=>Math.random()-.5).forEach(k=>{const w=el('div','w',`<img src="assets/w_${k}.png" alt="${k}">`);tr.append(w);
+  w.onpointerdown=e=>{if(w.dataset.done)return;w.setPointerCapture(e.pointerId);w.classList.remove('back');const[sx,sy,s]=P(e),r=w.getBoundingClientRect(),q=st.getBoundingClientRect();
+   const cx=(r.left+r.width/2-q.left)/s,cy=(r.top+r.height/2-q.top)/s;let dx=0,dy=0;w.style.zIndex=20;
+   w.onpointermove=m=>{const[mx,my]=P(m);dx=mx-sx;dy=my-sy;w.style.transform=`translate(${dx}px,${dy}px) scale(1.1)`};
+   w.onpointerup=()=>{w.onpointermove=w.onpointerup=null;w.style.zIndex=5;const fx=cx+dx,fy=cy+dy;let best=null,bd=230;
+    ANS.forEach(a=>{if(done.has(a[4]))return;const d=Math.hypot(fx-(a[0]+a[2]/2),fy-(a[1]+a[3]/2));if(d<bd){bd=d;best=a}});
+    if(!best){w.classList.add('back');w.style.transform='';return}
+    const b=el('div','badge');ui.append(b);box(b,best[0]+best[2]-30,best[1]-24,64,64);
+    if(best[4]==k){good();done.add(k);w.dataset.done=1;w.style.transform=`translate(${best[0]+best[2]/2-cx}px,${best[1]+best[3]/2-cy}px)`;b.style.background='#2f9e44';b.textContent='✔';
+     if(++n==4){S.match=1;sv();setTimeout(()=>{good();ui.append(el('div','msg','Hebat! Semua bagian bunga sudah tepat! 🎉'));window.arrow&&window.arrow.classList.add('pulse')},500)}}
+    else{bad();b.style.background='#d6336c';b.textContent='✖';w.classList.add('back');w.style.transform=''}
+    setTimeout(()=>{if(b.textContent=='✖')b.remove()},900)}}})},
+9:()=>{const F={w:[301,414],r:[1602,438]};let stg=0,home=[880,520];
+ const say=el('div','say','Seret lebah ke <b>&nbsp;bunga putih&nbsp;</b> untuk mengambil serbuk sari!');ui.append(say);
+ const bee=el('div','bee',BEE);ui.append(bee);const at=p=>{bee.style.left=p[0]+'px';bee.style.top=p[1]+'px'};at(home);
+ const reset=el('div','btn','Ulangi ↺');box(reset,1520,900,260,100);reset.style.display='none';reset.style.fontSize='38px';ui.append(reset);
+ reset.onclick=()=>{tap();stg=0;home=[880,520];at(home);bee.classList.remove('has');reset.style.display='none';say.innerHTML='Seret lebah ke <b>&nbsp;bunga putih&nbsp;</b> untuk mengambil serbuk sari!'};
+ const spark=c=>{for(let i=0;i<12;i++){const s=el('span','spk','✨');s.style.left=c[0]+'px';s.style.top=c[1]+'px';s.style.setProperty('--dx',(Math.random()*400-200)+'px');s.style.setProperty('--dy',(Math.random()*400-200)+'px');ui.append(s);setTimeout(()=>s.remove(),1200)}};
+ bee.onpointerdown=e=>{if(stg==2)return;bee.setPointerCapture(e.pointerId);bee.classList.add('drag');const[sx,sy]=P(e),x0=parseFloat(bee.style.left),y0=parseFloat(bee.style.top);
+  bee.onpointermove=m=>{const[mx,my]=P(m);bee.style.left=x0+mx-sx+'px';bee.style.top=y0+my-sy+'px'};
+  bee.onpointerup=()=>{bee.onpointermove=bee.onpointerup=null;bee.classList.remove('drag');const c=[parseFloat(bee.style.left)+95,parseFloat(bee.style.top)+95],d=f=>Math.hypot(c[0]-f[0],c[1]-f[1]);
+   if(stg==0&&d(F.w)<200){stg=1;good();home=[F.w[0]-95,F.w[1]-95];bee.classList.add('has');say.innerHTML='Serbuk sari menempel di tubuh lebah! Sekarang terbang ke <b>&nbsp;bunga merah&nbsp;</b>.'}
+   else if(stg==1&&d(F.r)<200){stg=2;good();home=[F.r[0]-95,F.r[1]-95];spark(F.r);S.pollen=1;sv();say.innerHTML='Hore! Serbuk sari sampai di kepala putik. Karena dari bunga lain, ini <b>&nbsp;penyerbukan silang&nbsp;</b>!';reset.style.display='flex';window.arrow.classList.add('pulse')}
+   else if(stg==0&&d(F.r)<200){bad();say.innerHTML='Ambil serbuk sari dulu di bunga putih ya!'}
+   at(home)}}},
+11:()=>{const q=el('div');ui.append(q);const hm=el('div','homebtn','🏠');hm.onclick=()=>{tap();go(2)};ui.append(hm);quiz(q,0,0)}};
+// ---------- kuis ----------
+const Q=[['Penyerbukan adalah sampainya serbuk sari ke ...',['kepala putik','kelopak','akar'],0],
+['Bagian bunga yang menghasilkan serbuk sari adalah ...',['kepala putik','kepala sari','mahkota'],1],
+['Urutan penyerbukan oleh lebah yang benar adalah ...',['Lebah hinggap → serbuk sari menempel → lebah pindah → serbuk sari jatuh di kepala putik','Lebah pindah → serbuk sari jatuh di kepala putik → lebah hinggap → serbuk sari menempel','Serbuk sari jatuh di kepala putik → lebah hinggap → lebah pindah → serbuk sari menempel'],0],
+['Serbuk sari dari bunga lain yang jatuh ke kepala putik disebut penyerbukan ...',['sendiri','silang','air'],1],
+['Hewan yang membantu penyerbukan bunga adalah ...',['cacing tanah','ikan','lebah dan kupu-kupu'],2]];
+function quiz(c,i,sc){c.innerHTML='';const t=el('div','wood','🐝 KUIS PENYERBUKAN');box(t,560,35,800,110,0);t.style.font='700 58px Fredoka';t.style.lineHeight='98px';c.append(t);
+ if(i>=Q.length){const stars=sc>=5?3:sc>=3?2:sc>=1?1:0;S.best=Math.max(S.best||0,sc);sv();
+  c.append(el('div','qq',`<div style="margin-top:130px;font-size:70px">Skor kamu: ${sc} / ${Q.length}</div><div style="font-size:150px;color:#f5a800">${'★'.repeat(stars)}<span style="color:#ddd">${'★'.repeat(3-stars)}</span></div><div style="font-size:54px">${sc>=4?'Luar biasa! Kamu sahabat lebah sejati!':sc>=2?'Bagus! Ayo belajar lagi biar makin jago!':'Jangan menyerah, ayo coba lagi!'}</div>`));
+  const a=el('div','btn','Main lagi');box(a,460,860,460,130);a.onclick=()=>{tap();quiz(c,0,0)};const b=el('div','btn','Menu');box(b,1000,860,460,130);b.onclick=()=>{tap();go(2)};c.append(a,b);return}
+ const[qt,op,ci]=Q[i];c.append(box(el('div','wood',`Soal ${i+1}/${Q.length}`),1540,45,300,80));c.lastChild.style.font='700 40px/68px Fredoka';
+ c.append(el('div','qq',qt));let lock=0;
+ op.map((o,k)=>[o,k]).sort(()=>Math.random()-.5).forEach(([o,k],j)=>{const b=el('div','qo',o);b.style.top=(400+j*160)+'px';
+  b.onclick=()=>{if(lock)return;lock=1;if(k==ci){good();b.classList.add('ok');sc++}else{bad();b.classList.add('no');[...c.querySelectorAll('.qo')].find(x=>x.textContent==op[ci]).classList.add('ok')}setTimeout(()=>quiz(c,i+1,sc),1500)};c.append(b)})}
+// ---------- Pencapaian & Petunjuk ----------
+const ach=()=>modal(`<h2>🏆 Pencapaian</h2><p>${S.match?'🏅':'🔒'} <b>Ahli Bagian Bunga</b> – memasangkan semua nama bagian bunga</p><p>${S.pollen?'🏅':'🔒'} <b>Sahabat Lebah</b> – membantu lebah melakukan penyerbukan</p><p>${(S.best||0)>=4?'🏅':'🔒'} <b>Bintang Kuis</b> – benar minimal 4 dari 5 soal</p><p>Skor kuis terbaik: <b>${S.best||0} / 5</b></p>`);
+const help=()=>modal(`<h2>❓ Petunjuk</h2><p>1. Tekan <b>BELAJAR</b> untuk mengenal bagian bunga dan penyerbukan.</p><p>2. Tekan <b>BERMAIN</b>, lalu <b>seret nama</b> ke kotak putih yang tepat.</p><p>3. Seret <b>lebah</b> ke bunga putih, lalu ke bunga merah.</p><p>4. Jawab <b>kuis</b> dengan menyentuh jawabanmu.</p><p>Tombol 🏠 = menu, tombol ➜ = lanjut.</p>`);
+go(1);
+</script></body></html>
